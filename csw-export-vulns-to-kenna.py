@@ -1,7 +1,6 @@
 import os
 import json
 from datetime import datetime
-
 import requests
 from netaddr import *
 from tetpyclient import RestClient
