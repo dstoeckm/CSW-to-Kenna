@@ -81,6 +81,7 @@ def CreateJsonFile(s_list,f_name):
     with open('{}.json'.format(f_name), 'w') as f:
             json.dump(s_list, f)
     return
+
 def collect_asset_info(rc):
     failed_count=0
     successful_count=0
