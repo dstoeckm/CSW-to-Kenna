@@ -17,7 +17,6 @@ kenna_connector_id = os.getenv('KENNA_CONNECTOR_ID')
 restclient = RestClient(API_ENDPOINT, credentials_file=os.getenv('API_CREDENTIALS_FILE'), verify=True)
 
 def kenna_file_upload(t,c,u,fn,):
-    #upload_f = open(fn, 'rb')
 
     files = {
     'file': json.dumps(fn)
