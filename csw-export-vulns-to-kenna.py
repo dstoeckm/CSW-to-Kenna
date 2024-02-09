@@ -5,6 +5,9 @@ import requests
 from netaddr import *
 from tetpyclient import RestClient
 from dotenv import load_dotenv
+import urllib3
+
+urllib3.disable_warnings()
 
 load_dotenv()
 
@@ -14,7 +17,7 @@ kenna_token = os.getenv('KENNA_TOKEN')
 kenna_base_url=os.getenv('KENNA_URL')
 kenna_connector_id = os.getenv('KENNA_CONNECTOR_ID')
 
-restclient = RestClient(API_ENDPOINT, credentials_file=os.getenv('API_CREDENTIALS_FILE'), verify=True)
+restclient = RestClient(API_ENDPOINT, credentials_file=os.getenv('API_CREDENTIALS_FILE'), verify=False)
 
 def kenna_file_upload(t,c,u,fn,):
 
@@ -27,18 +30,24 @@ def kenna_file_upload(t,c,u,fn,):
     'X-Risk-Token': t,
     }
 
-    url = f"{u}connectors/{c}/data_file"
+    #### Changes
+    ##payload = {
+    ##'run': 'true'
+    ##}
+    ####
+    url = f"{u}/connectors/{c}/data_file"
 
     r = requests.post(url, headers=header, files=files)
     return r.json()
 
-def kenna_run_connector (t,c,u,fid):
+def kenna_run_connector (t,c,u):
     
     header = {
     'X-Risk-Token': t,
     }
 
-    url = f"{u}connectors/{c}/run?data_files[]={fid}"
+#    url = f"{u}/connectors/{c}/run?data_files[]={fid}"
+    url = f"{u}/connectors/{c}/run"
     r = requests.get(url, headers=header)
     return (r.json())
 
@@ -49,7 +58,7 @@ def kenna_connector_status (t,c,u,cid):
     'X-Risk-Token': t,
     }
 
-    url = f"{u}connectors/{c}/connector_runs/{cid}"
+    url = f"{u}/connectors/{c}/connector_runs/{cid}"
 
     r = requests.get(url, headers=header)
     return (r.json())
@@ -59,7 +68,7 @@ def kenna_list_connectors(t,u):
         'Accept': 'application/json',
         'X-Risk-Token': t
         }
-    r = (requests.get(u + 'connectors', headers=headers))
+    r = (requests.get(u + '/connectors', headers=headers))
     if r.status_code == 200:
         return r.json()
     else:
@@ -70,7 +79,7 @@ def kenna_get_connector_runs(t,u,i):
         'Accept': 'application/json',
         'X-Risk-Token': t
         }
-    r = (requests.get(u + 'connectors/'+i+'/connector_runs', headers=headers))
+    r = (requests.get(u + '/connectors/'+i+'/connector_runs', headers=headers))
     if r.status_code == 200:
         return r.json()
     else:
@@ -205,11 +214,20 @@ if __name__ == "__main__":
     CreateJsonFile(kenna_upload, 'kenna_csw')
     u_resp =  (kenna_file_upload(kenna_token,kenna_connector_id,kenna_base_url,kenna_upload))
     if u_resp['success']:
-        print ('File uploaded succeeded, datafile id =', u_resp['data_file'])
-        r_resp = (kenna_run_connector(kenna_token,kenna_connector_id,kenna_base_url,u_resp['data_file']))
+    #    print ("----------------------")
+    #    print (kenna_base_url)
+    #    print ("----------------------")
+    #    print (u_resp)
+    #    print ("----------------------")
+    #    print (kenna_connector_id)
+    #    print (kenna_token)
+        print ('File uploaded succeeded to emeatest Tenant, datafile id =', u_resp['data_file'])
+      #  r_resp = (kenna_run_connector(kenna_token,kenna_connector_id,kenna_base_url,u_resp['data_file']))
+        r_resp = (kenna_run_connector(kenna_token,kenna_connector_id,kenna_base_url))
         if r_resp['success']:
             run_id = r_resp['connector_run_id']
-
+        print ("Upload completed, import triggered. go to 'https://emeatest.eu.kennasecurity.com/connectors/132977' to check the state")
+    #    print (run_id)
 
     else:
         print ('File uploaded failed')
